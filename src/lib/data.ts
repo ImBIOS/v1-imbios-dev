@@ -9,14 +9,29 @@ export async function getGithubUserProfileBio() {
 	}
 
 	const html = await res.text();
-	// This regular expression looks for the specific pattern that surrounds the user bio.
-	// Note: This is fragile and might need updates if GitHub changes their markup.
-	const bioRegex = /<div class="user-profile-bio"><div>(.*?)<\/div><\/div>/;
+	// Adjusted to capture only the inner content of the div with "user-profile-bio" class
+	const bioRegex =
+		/<div class="[^"]*user-profile-bio[^"]*"[^>]*data-bio-text="([^"]+)">/;
 	const match = bioRegex.exec(html);
 
 	if (match?.[1]) {
-		// Unescape HTML entities in the bio text.
+		// Extracting bio from the `data-bio-text` attribute to get the expected result directly
 		const bio = match[1]
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&amp;/g, "&")
+			.replace(/&quot;/g, '"')
+			.replace(/&#39;/g, "'");
+		return bio;
+	}
+
+	// Fallback to matching the inner HTML of the div if the data-bio-text attribute is not found
+	const fallbackRegex =
+		/<div class="[^"]*user-profile-bio[^"]*"[^>]*>\s*<div>(.*?)<\/div>\s*<\/div>/;
+	const fallbackMatch = fallbackRegex.exec(html);
+
+	if (fallbackMatch?.[1]) {
+		const bio = fallbackMatch[1]
 			.replace(/&lt;/g, "<")
 			.replace(/&gt;/g, ">")
 			.replace(/&amp;/g, "&")

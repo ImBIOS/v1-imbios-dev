@@ -109,6 +109,7 @@ const Game = ({ setIsModalOpen }: Props) => {
 				</p>
 				<button
 					type="button"
+					disabled={isHidden}
 					onClick={handleOnClose}
 					className="p-2 mt-4 border border-gray-300 rounded-lg"
 				>
